@@ -39,6 +39,16 @@ module.exports = async (req, res) => {
             console.error("Error while saving data:", error);
             res.status(500).json({ error: "Failed to save data" });
         }
+    } else if (req.method === "GET") {
+        try {
+            // Ambil semua data dari collection sensor_data
+            const data = await SensorData.find();
+
+            res.status(200).json(data);
+        } catch (error) {
+            console.error("Error while retrieving data:", error);
+            res.status(500).json({ error: "Failed to retrieve data" });
+        }
     } else {
         res.status(405).json({ error: "Method not allowed" });
     }
