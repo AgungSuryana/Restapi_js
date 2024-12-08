@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
 
-// Koneksi ke MongoDB (gunakan variabel lingkungan untuk URI)
+// Koneksi ke MongoDB
 const dbURI = process.env.MONGODB_URI || "mongodb+srv://agungMq135:agungmq135@cluster0.h9eyb.mongodb.net/sensor_data?retryWrites=true&w=majority";
+let isConnected = false;
 
-mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("MongoDB connected successfully"))
-    .catch((error) => console.error("Error connecting to MongoDB:", error));
+// Fungsi untuk memastikan koneksi hanya dilakukan sekali
+async function connectToDatabase() {
+    if (isConnected) return;
+    await mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true });
+    isConnected = true;
+    console.log("MongoDB connected successfully");
+}
 
 // Schema dan Model untuk data sensor
 const sensorSchema = new mongoose.Schema({
@@ -17,6 +22,9 @@ const SensorData = mongoose.model('mq135', sensorSchema);
 
 // Fungsi serverless handler
 module.exports = async (req, res) => {
+    // Pastikan untuk terhubung ke database
+    await connectToDatabase();
+
     if (req.method === "POST") {
         try {
             const { gasLevel } = req.body;
