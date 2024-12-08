@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const dbURI = process.env.MONGODB_URI || "mongodb+srv://agungMq135:agungmq135@cluster0.h9eyb.mongodb.net/sensor_data?retryWrites=true&w=majority&appName=Cluster0";
 let isConnected = false;
 
-// Fungsi untuk memastikan koneksi hanya dilakukan sekali
 async function connectToDatabase() {
     if (isConnected) return;
     await mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -11,15 +10,26 @@ async function connectToDatabase() {
     console.log("MongoDB connected successfully");
 }
 
-// Schema dan Model untuk data sensor
+/**
+ * Schema untuk data sensor:
+ * - gasLevel (Number): Nilai tingkat gas dari sensor MQ135
+ * - timestamp (Date): Waktu perekaman data, default saat ini
+ */
 const sensorSchema = new mongoose.Schema({
     gasLevel: Number,
     timestamp: { type: Date, default: Date.now }
 });
 
-// Gantilah nama collection di sini menjadi "sensor_data"
+// Model MongoDB yang menggunakan schema 'sensorSchema'
+// Catatan: Nama koleksi adalah "sensor_data"
 const SensorData = mongoose.model('mq135', sensorSchema);
 
+/**
+ * Endpoint untuk menangani request HTTP
+ * - Method:
+ *    - POST: Menyimpan data sensor baru
+ *    - GET: Mengambil semua data sensor
+ */
 module.exports = async (req, res) => {
     await connectToDatabase();
 
@@ -27,10 +37,12 @@ module.exports = async (req, res) => {
         try {
             const { gasLevel } = req.body;
 
+            // Validasi data dari request
             if (gasLevel === undefined) {
                 return res.status(400).json({ error: "Data tidak lengkap" });
             }
 
+            // Membuat data baru di database
             const newSensorData = new SensorData({ gasLevel });
             await newSensorData.save();
 
@@ -41,7 +53,7 @@ module.exports = async (req, res) => {
         }
     } else if (req.method === "GET") {
         try {
-            // Ambil semua data dari collection sensor_data
+            // Mengambil semua data dari koleksi sensor_data
             const data = await SensorData.find();
 
             res.status(200).json(data);
@@ -50,6 +62,7 @@ module.exports = async (req, res) => {
             res.status(500).json({ error: "Failed to retrieve data" });
         }
     } else {
+        // Method selain POST dan GET tidak diizinkan
         res.status(405).json({ error: "Method not allowed" });
     }
 };
