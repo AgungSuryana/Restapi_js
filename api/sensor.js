@@ -17,7 +17,8 @@ const sensorSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
-const SensorData = mongoose.model('mq135', sensorSchema);
+// Gantilah nama collection di sini menjadi "sensor_data"
+const SensorData = mongoose.model('sensor_data', sensorSchema);
 
 module.exports = async (req, res) => {
     await connectToDatabase();
