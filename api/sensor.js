@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Koneksi ke MongoDB
 const dbURI = process.env.MONGODB_URI || "mongodb+srv://agungMq135:agungmq135@cluster0.h9eyb.mongodb.net/sensor_data?retryWrites=true&w=majority";
 let isConnected = false;
 
@@ -20,9 +19,7 @@ const sensorSchema = new mongoose.Schema({
 
 const SensorData = mongoose.model('mq135', sensorSchema);
 
-// Fungsi serverless handler
 module.exports = async (req, res) => {
-    // Pastikan untuk terhubung ke database
     await connectToDatabase();
 
     if (req.method === "POST") {
